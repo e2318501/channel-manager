@@ -29,7 +29,7 @@ function isChannelOfUser(channel: TextChannel, userId: string) {
 }
 
 function getTopic(userId: string, content: string) {
-    return `${content === "" ? "" : `${content}\n`}owner: ${userId}`;
+    return `${content === "" ? "" : `${content}\n\n`}owner: ${userId}`;
 }
 
 function getChannelsOfUser(
