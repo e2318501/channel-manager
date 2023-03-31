@@ -96,7 +96,7 @@ export async function createChannelCommand(
 
 async function editCommand(
     interaction: ChatInputCommandInteraction,
-    action: (channel: TextChannel) => Promise<unknown>
+    action: (channel: TextChannel) => Promise<void>
 ) {
     const channel = interaction.channel;
     if (channel instanceof TextChannel) {
@@ -113,13 +113,13 @@ async function editCommand(
 export async function deleteChannelCommand(
     interaction: ChatInputCommandInteraction
 ) {
-    await editCommand(interaction, async () => {
+    await editCommand(interaction, async (channel) => {
         const confirm = interaction.options.getBoolean("confirm", true);
         if (confirm) {
             await interaction.reply({
                 content: "このチャンネルは削除されます",
             });
-            await interaction.channel?.delete();
+            await channel.delete();
         } else {
             await interaction.reply({
                 content: "チャンネルの削除をキャンセルしました",
