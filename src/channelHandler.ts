@@ -4,6 +4,8 @@ import {
     Snowflake,
     TextChannel,
     ChatInputCommandInteraction,
+    GuildMember,
+    PermissionFlagsBits,
 } from "discord.js";
 
 function getCategoryChannels(guild: Guild) {
@@ -18,6 +20,12 @@ function getCategoryChannel(guild: Guild, id: Snowflake) {
 
 function getChildChannelsInCategory(guild: Guild, id: Snowflake) {
     return getCategoryChannel(guild, id)?.children?.cache;
+}
+
+function getTextChannelsInCategory(guild: Guild, id: Snowflake) {
+    return getChildChannelsInCategory(guild, id)
+        ?.filter((c) => c instanceof TextChannel)
+        ?.map((c) => c as TextChannel);
 }
 
 function isChannelTopicOfUser(topic: string | null, id: string) {
@@ -37,10 +45,9 @@ function getChannelsOfUser(
     categoryId: Snowflake,
     userId: string
 ) {
-    return getChildChannelsInCategory(guild, categoryId)
-        ?.filter((c) => c instanceof TextChannel)
-        ?.map((c) => c as TextChannel)
-        ?.filter((c) => isChannelTopicOfUser(c.topic, userId));
+    return getTextChannelsInCategory(guild, categoryId)?.filter((c) =>
+        isChannelTopicOfUser(c.topic, userId)
+    );
 }
 
 async function createChannel(
@@ -94,13 +101,23 @@ export async function createChannelCommand(
     }
 }
 
+function hasPermissionToEdit(channel: TextChannel, member: GuildMember) {
+    return channel
+        .permissionsFor(member)
+        .has(PermissionFlagsBits.ManageChannels);
+}
+
 async function editCommand(
     interaction: ChatInputCommandInteraction,
     action: (channel: TextChannel) => Promise<void>
 ) {
     const channel = interaction.channel;
-    if (channel instanceof TextChannel) {
-        if (isChannelOfUser(channel, interaction.user.id)) {
+    const member = interaction.member;
+    if (channel instanceof TextChannel && member instanceof GuildMember) {
+        if (
+            isChannelOfUser(channel, interaction.user.id) ||
+            hasPermissionToEdit(channel, member)
+        ) {
             await action(channel);
         } else {
             await interaction.reply({
