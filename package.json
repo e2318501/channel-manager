@@ -14,7 +14,7 @@
         "deploy": "node script/deployCommands.js",
         "format": "npx prettier src script --write"
     },
-    "author": "tsuoihito",
+    "author": "e2318501",
     "license": "GPL-3.0-or-later",
     "devDependencies": {
         "@typescript-eslint/eslint-plugin": "^5.30.7",
